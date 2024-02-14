@@ -6,13 +6,13 @@ class ServerJsonHTTP:
     server_host = '0.0.0.0'
     def __init__(self, server_port = 8080) -> None:
         self.server_port = server_port
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        server_socket.bind((self.server_host, self.server_port))
-        server_socket.listen(1) 
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.server_socket.bind((self.server_host, self.server_port))
+        self.server_socket.listen(1) 
         pass
     
-    def main_thread(self):
+    def server_thread_init(self):
         while True:    
             self.client_connection, client_address = self.server_socket.accept()
             self.request = self.client_connection.recv(1024).decode()
@@ -22,7 +22,7 @@ class ServerJsonHTTP:
             self.client_connection.sendall(response.encode())
             self.client_connection.close()
     
-    def main_thread_run(self):
+    def server_thread_run(self):
         self.socket_server_thread = threading.Thread(target=socket_server_thread_func, name="socket_server_thread")
         self.socket_server_thread.start()
 
@@ -51,14 +51,18 @@ def socket_server_thread_func():
     server_socket.close()
 
 
-socket_server_thread = threading.Thread(target=socket_server_thread_func, name="socket_server_thread")
-socket_server_thread.start()
+ser = ServerJsonHTTP()
+ser.server_thread_init()
+ser.server_thread_run()
+
+#socket_server_thread = threading.Thread(target=socket_server_thread_func, name="socket_server_thread")
+#socket_server_thread.start()
 
 
 
 
 
-socket_server_thread.join()
+#socket_server_thread.join()
 
 print_thread = threading.Thread(target=print_thread_func, name="print_thread", args=("heh",))
 print_thread.start()
